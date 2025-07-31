@@ -6,11 +6,12 @@ Extract bass from audio files using command line interface.
 import argparse
 import os
 import sys
-import subprocess
 import shutil
+import logging
 from pathlib import Path
 from pydub import AudioSegment
 from mix_wavs import mix_wavs
+from spleeter.separator import Separator
 
 
 def extract_bass_from_file(input_file, output_folder, nocleanup=False):
@@ -20,25 +21,50 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False):
     Args:
         input_file (str): Path to input audio file
         output_folder (str): Path to output folder
+        nocleanup (bool): Whether to skip cleanup of temporary files
     """
+    # Setup logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('error.log'),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger(__name__)
+    
     try:
         # Get the filename without extension
         input_path = Path(input_file)
         filename = input_path.stem
         
-        print(f"Processing: {input_file}")
+        logger.info(f"Processing: {input_file}")
         
         # Create temp folder for Spleeter output
-        temp_folder = "temp"
+        temp_folder = "bass_extractor_temp"
         os.makedirs(temp_folder, exist_ok=True)
         
-        # Run Spleeter command
-        print(f"Running Spleeter separation...")
-        cmd = ["spleeter", "separate", "-o", temp_folder, "-p", "spleeter:4stems", input_file]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        # Initialize Spleeter separator with error handling
+        logger.info(f"Initializing Spleeter separator...")
+        try:
+            separator = Separator('spleeter:4stems')
+            logger.info("Spleeter separator initialized successfully")
+        except Exception as e:
+            error_msg = f"Failed to initialize Spleeter separator: {str(e)}"
+            logger.error(error_msg)
+            print(f"Error: {error_msg}")
+            return
         
-        if result.returncode != 0:
-            print(f"Spleeter error: {result.stderr}")
+        # Perform separation using Spleeter API
+        logger.info(f"Running Spleeter separation...")
+        try:
+            separator.separate_to_file(input_file, temp_folder)
+            logger.info("Spleeter separation completed successfully")
+        except Exception as e:
+            error_msg = f"Failed to perform Spleeter separation for {input_file}: {str(e)}"
+            logger.error(error_msg)
+            print(f"Error: {error_msg}")
             return
         
         # Path to the separated files
@@ -49,14 +75,29 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False):
         other_path = os.path.join(separated_folder, "other.wav")
         
         # Check if all files exist
-        if not all(os.path.exists(path) for path in [bass_path, drums_path, vocals_path, other_path]):
-            print(f"Error: Not all separated files were created for {input_file}")
+        missing_files = []
+        for path, name in [(bass_path, "bass.wav"), (drums_path, "drums.wav"), 
+                          (vocals_path, "vocals.wav"), (other_path, "other.wav")]:
+            if not os.path.exists(path):
+                missing_files.append(name)
+        
+        if missing_files:
+            error_msg = f"Missing separated files for {input_file}: {', '.join(missing_files)}"
+            logger.error(error_msg)
+            print(f"Error: {error_msg}")
             return
         
-        print(f"Separation completed. Mixing tracks...")
+        logger.info(f"Separation completed. Mixing tracks...")
         
         # Use mix_wavs function to create the final outputs
-        mix_wavs(bass_path, drums_path, vocals_path, other_path, filename, output_folder)
+        try:
+            mix_wavs(bass_path, drums_path, vocals_path, other_path, filename, output_folder)
+            logger.info(f"Successfully created output files for {input_file}")
+        except Exception as e:
+            error_msg = f"Failed to create output files for {input_file}: {str(e)}"
+            logger.error(error_msg)
+            print(f"Error: {error_msg}")
+            return
         
         print(f"Completed: {input_file}")
         print(f"  - {filename}[NOBASS].mp3 created in {output_folder}")
@@ -64,14 +105,22 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False):
         
         # Clean up temp files
         if not nocleanup:
-            print("Cleaning up temporary files...")
-            if os.path.exists(separated_folder):
-                shutil.rmtree(separated_folder)
+            logger.info("Cleaning up temporary files...")
+            try:
+                if os.path.exists(separated_folder):
+                    shutil.rmtree(separated_folder)
+                    logger.info("Temporary files cleaned up successfully")
+            except Exception as e:
+                error_msg = f"Failed to clean up temporary files: {str(e)}"
+                logger.error(error_msg)
+                print(f"Warning: {error_msg}")
         else:
-            print("Skipping cleanup - temporary files preserved")
+            logger.info("Skipping cleanup - temporary files preserved")
         
     except Exception as e:
-        print(f"Error processing {input_file}: {str(e)}")
+        error_msg = f"Unexpected error processing {input_file}: {str(e)}"
+        logger.error(error_msg)
+        print(f"Error: {error_msg}")
 
 
 def main():
@@ -171,10 +220,35 @@ Examples:
     print(f"Output folder: {args.output_folder}")
     print("Starting bass extraction...")
     
-    for file_path in files_to_process:
-        extract_bass_from_file(file_path, args.output_folder, args.nocleanup)
+    # Setup logging for main process
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('error.log'),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger(__name__)
     
-    print("Bass extraction completed!")
+    successful_files = 0
+    failed_files = 0
+    
+    for file_path in files_to_process:
+        try:
+            extract_bass_from_file(file_path, args.output_folder, args.nocleanup)
+            successful_files += 1
+        except Exception as e:
+            error_msg = f"Failed to process {file_path}: {str(e)}"
+            logger.error(error_msg)
+            failed_files += 1
+    
+    # Summary
+    logger.info(f"Processing completed. Successful: {successful_files}, Failed: {failed_files}")
+    print(f"Bass extraction completed! Successful: {successful_files}, Failed: {failed_files}")
+    
+    if failed_files > 0:
+        print(f"Check error.log for detailed error information.")
 
 
 if __name__ == "__main__":

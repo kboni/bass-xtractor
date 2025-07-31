@@ -1,6 +1,8 @@
 # Bass Extractor
 
-A Python script to extract bass from audio files using command line interface. **This project is based on [Spleeter](https://github.com/deezer/spleeter)**, an open-source audio separation library by Deezer.
+A Python script and GUI to extract bass from audio files using command line interface and GUI. **This project is based on [Spleeter](https://github.com/deezer/spleeter)**, an open-source audio separation library by Deezer.
+
+**Testing Status**: The script and GUI are currently tested only on Windows. Linux and macOS compatibility is implemented but requires testing.
 
 ## Installation
 
@@ -59,7 +61,11 @@ pip install ffmpeg-python
 
 #### macOS
 ```bash
+# Using Homebrew (recommended)
 brew install ffmpeg
+
+# Or download from https://ffmpeg.org/download.html
+# Make sure to add it to your PATH or specify the path in the GUI
 ```
 
 #### Linux
@@ -70,21 +76,59 @@ sudo apt install ffmpeg
 
 ## Usage
 
-The script can be called in several ways:
+### GUI Interface (Recommended for beginners)
 
-### Using the Python script directly:
+The easiest way to use Bass Extractor is through the graphical interface:
+
+#### Windows:
+```bash
+gui/extract_bass_gui.bat
+```
+
+#### Linux:
+```bash
+./gui/extract_bass_gui.sh
+```
+
+#### macOS:
+```bash
+# Terminal
+./gui/extract_bass_gui.sh
+
+# Double-click (if you make the .command file executable)
+./gui/extract_bass_gui.command
+```
+
+#### Direct Python:
+```bash
+python gui/extract_bass_gui.py
+```
+
+The GUI provides:
+- Drag-and-drop file selection
+- Folder selection for batch processing
+- Real-time progress tracking
+- Live log output
+- Easy FFmpeg path configuration
+- Skip cleanup option
+
+### Command Line Interface
+
+For advanced users or automation, the command line interface is available:
+
+#### Using the Python script directly:
 ```bash
 python extract_bass.py --folder /path/to/music --output_folder /path/to/output
 python extract_bass.py --file song1.mp3 --file song2.mp3 --output_folder /path/to/output
 ```
 
-### Using the batch file (Windows):
+#### Using the batch file (Windows):
 ```bash
 extract_bass.bat --folder /path/to/music --output_folder /path/to/output
 extract_bass.bat --file song1.mp3 --file song2.mp3 --output_folder /path/to/output
 ```
 
-### Using the shell script (Unix/Linux/macOS):
+#### Using the shell script (Unix/Linux/macOS):
 ```bash
 ./extract_bass.sh --folder /path/to/music --output_folder /path/to/output
 ./extract_bass.sh --file song1.mp3 --file song2.mp3 --output_folder /path/to/output
@@ -97,6 +141,17 @@ extract_bass.bat --file song1.mp3 --file song2.mp3 --output_folder /path/to/outp
 - `--output_folder`: Required. Specify the output folder for processed files
 - `--ffmpeg path`: Optional. Path to ffmpeg executable (if not in PATH)
 - `--nocleanup`: Optional. Skip cleanup of temporary files (useful for debugging)
+
+## Error Logging
+
+The script automatically logs all errors and processing information to `error.log` in the current directory. This includes:
+- Spleeter initialization errors
+- Audio separation failures
+- File processing errors
+- Cleanup issues
+- Processing statistics
+
+Check this file if you encounter any issues during processing.
 
 ## Rules
 
@@ -135,8 +190,9 @@ For each input file, the script will create two output files in the specified ou
 
 ## How it works
 
-1. Uses Spleeter to separate the audio into 4 stems: bass, drums, vocals, and other
+1. Uses Spleeter Python API to separate the audio into 4 stems: bass, drums, vocals, and other
 2. Mixes drums, vocals, and other together to create the "no bass" version
 3. Extracts the bass track separately
 4. Exports both files in MP3 format to the output folder
-5. Cleans up temporary files automatically 
+5. Cleans up temporary files automatically
+6. Logs all errors and processing information to `error.log` 
