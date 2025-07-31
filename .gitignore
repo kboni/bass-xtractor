@@ -1,0 +1,11 @@
+node_modules
+pretrained_models
+.python-version
+get-pip.py
+package.json
+package-lock.json
+__pycache__
+temp
+
+audio_output
+test
