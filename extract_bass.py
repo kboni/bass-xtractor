@@ -100,8 +100,8 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False):
             return
         
         print(f"Completed: {input_file}")
-        print(f"  - {filename}[NOBASS].mp3 created in {output_folder}")
-        print(f"  - {filename}[BASSONLY].mp3 created in {output_folder}")
+        print(f"  - {filename}.mp3 created in {output_folder}/NOBASS/")
+        print(f"  - {filename}.mp3 created in {output_folder}/BASSONLY/")
         
         # Clean up temp files
         if not nocleanup:

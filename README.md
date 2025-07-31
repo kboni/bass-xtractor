@@ -183,10 +183,10 @@ extract_bass --folder ./music --output_folder ./output --nocleanup
 
 ## Output
 
-For each input file, the script will create two output files in the specified output folder:
+For each input file, the script will create two output files in separate subfolders:
 
-1. `{original_filename}[NOBASS].mp3` - The original song without bass (drums + vocals + other instruments mixed together)
-2. `{original_filename}[BASSONLY].mp3` - Only the bass track extracted from the original song
+1. `{output_folder}/NOBASS/{original_filename}.mp3` - The original song without bass (drums + vocals + other instruments mixed together)
+2. `{output_folder}/BASSONLY/{original_filename}.mp3` - Only the bass track extracted from the original song
 
 ## How it works
 
