@@ -14,7 +14,7 @@ from mix_wavs import mix_wavs
 from spleeter.separator import Separator
 
 
-def extract_bass_from_file(input_file, output_folder, nocleanup=False):
+def extract_bass_from_file(input_file, output_folder, nocleanup=False, novocals=False, nodrums=False, noother=False, bassonly=False):
     """
     Extract bass from a single audio file using Spleeter.
     
@@ -91,7 +91,7 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False):
         
         # Use mix_wavs function to create the final outputs
         try:
-            mix_wavs(bass_path, drums_path, vocals_path, other_path, filename, output_folder)
+            mix_wavs(bass_path, drums_path, vocals_path, other_path, filename, output_folder, novocals, nodrums, noother, bassonly)
             logger.info(f"Successfully created output files for {input_file}")
         except Exception as e:
             error_msg = f"Failed to create output files for {input_file}: {str(e)}"
@@ -100,7 +100,18 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False):
             return
         
         print(f"Completed: {input_file}")
-        print(f"  - {filename}.mp3 created in {output_folder}/NOBASS/")
+        excluded_tracks = []
+        if novocals:
+            excluded_tracks.append("vocals")
+        if nodrums:
+            excluded_tracks.append("drums")
+        if noother:
+            excluded_tracks.append("other")
+        
+        if excluded_tracks:
+            print(f"  - {filename}.mp3 created in {output_folder}/NOBASS/ (excluded: {', '.join(excluded_tracks)})")
+        else:
+            print(f"  - {filename}.mp3 created in {output_folder}/NOBASS/")
         print(f"  - {filename}.mp3 created in {output_folder}/BASSONLY/")
         
         # Clean up temp files
@@ -165,6 +176,30 @@ Examples:
         '--nocleanup',
         action='store_true',
         help='Skip cleanup of temporary files'
+    )
+    
+    parser.add_argument(
+        '--novocals',
+        action='store_true',
+        help='Exclude vocals from NOBASS mix'
+    )
+    
+    parser.add_argument(
+        '--nodrums',
+        action='store_true',
+        help='Exclude drums from NOBASS mix'
+    )
+    
+    parser.add_argument(
+        '--noother',
+        action='store_true',
+        help='Exclude other instruments from NOBASS mix'
+    )
+    
+    parser.add_argument(
+        '--bassonly',
+        action='store_true',
+        help='Create only BASSONLY output (skip NOBASS)'
     )
     
     args = parser.parse_args()
@@ -236,7 +271,7 @@ Examples:
     
     for file_path in files_to_process:
         try:
-            extract_bass_from_file(file_path, args.output_folder, args.nocleanup)
+            extract_bass_from_file(file_path, args.output_folder, args.nocleanup, args.novocals, args.nodrums, args.noother, args.bassonly)
             successful_files += 1
         except Exception as e:
             error_msg = f"Failed to process {file_path}: {str(e)}"

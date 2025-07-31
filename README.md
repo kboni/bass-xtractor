@@ -141,6 +141,9 @@ extract_bass.bat --file song1.mp3 --file song2.mp3 --output_folder /path/to/outp
 - `--output_folder`: Required. Specify the output folder for processed files
 - `--ffmpeg path`: Optional. Path to ffmpeg executable (if not in PATH)
 - `--nocleanup`: Optional. Skip cleanup of temporary files (useful for debugging)
+- `--novocals`: Optional. Exclude vocals from NOBASS mix
+- `--nodrums`: Optional. Exclude drums from NOBASS mix
+- `--noother`: Optional. Exclude other instruments from NOBASS mix
 
 ## Error Logging
 
@@ -179,6 +182,14 @@ extract_bass --file song.mp3 --output_folder ./output --ffmpeg "/usr/local/bin/f
 
 # Skip cleanup to preserve temporary files (useful for debugging)
 extract_bass --folder ./music --output_folder ./output --nocleanup
+
+# Exclude specific tracks from NOBASS mix
+extract_bass --file song.mp3 --output_folder ./output --novocals
+extract_bass --file song.mp3 --output_folder ./output --nodrums
+extract_bass --file song.mp3 --output_folder ./output --noother
+
+# Combine multiple exclusions
+extract_bass --file song.mp3 --output_folder ./output --novocals --nodrums
 ```
 
 ## Output
