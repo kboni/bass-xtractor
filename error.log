@@ -171,3 +171,81 @@ Colocations handled automatically by placer.
 2025-07-31 10:29:50,304 - INFO - Cleaning up temporary files...
 2025-07-31 10:29:50,336 - INFO - Temporary files cleaned up successfully
 2025-07-31 10:29:50,336 - INFO - Processing completed. Successful: 3, Failed: 0
+2025-07-31 11:23:37,559 - INFO - Processing: C:\Users\remov\workspace\bass-remover\test\Republic A 67 es Út.mp3
+2025-07-31 11:23:37,574 - INFO - Initializing Spleeter separator...
+2025-07-31 11:23:37,648 - INFO - Spleeter separator initialized successfully
+2025-07-31 11:23:37,648 - INFO - Running Spleeter separation...
+2025-07-31 11:23:39,327 - INFO - Using config: {'_model_dir': 'pretrained_models\\4stems', '_tf_random_seed': None, '_save_summary_steps': 100, '_save_checkpoints_steps': None, '_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  per_process_gpu_memory_fraction: 0.7
+}
+, '_keep_checkpoint_max': 5, '_keep_checkpoint_every_n_hours': 10000, '_log_step_count_steps': 100, '_train_distribute': None, '_device_fn': None, '_protocol': None, '_eval_distribute': None, '_experimental_distribute': None, '_experimental_max_worker_delay_secs': None, '_session_creation_timeout_secs': 7200, '_checkpoint_save_graph_def': True, '_service': None, '_cluster_spec': ClusterSpec({}), '_task_type': 'worker', '_task_id': 0, '_global_id_in_cluster': 0, '_master': '', '_evaluation_master': '', '_is_chief': True, '_num_ps_replicas': 0, '_num_worker_replicas': 1}
+2025-07-31 11:23:39,361 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\spleeter\separator.py:146: calling DatasetV2.from_generator (from tensorflow.python.data.ops.dataset_ops) with output_types is deprecated and will be removed in a future version.
+Instructions for updating:
+Use output_signature instead
+2025-07-31 11:23:39,368 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\spleeter\separator.py:146: calling DatasetV2.from_generator (from tensorflow.python.data.ops.dataset_ops) with output_shapes is deprecated and will be removed in a future version.
+Instructions for updating:
+Use output_signature instead
+2025-07-31 11:23:39,445 - INFO - Calling model_fn.
+2025-07-31 11:23:41,835 - INFO - Apply unet for vocals_spectrogram
+2025-07-31 11:23:41,995 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\keras\layers\normalization\batch_normalization.py:514: _colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+2025-07-31 11:23:43,998 - INFO - Apply unet for drums_spectrogram
+2025-07-31 11:23:45,962 - INFO - Apply unet for bass_spectrogram
+2025-07-31 11:23:47,970 - INFO - Apply unet for other_spectrogram
+2025-07-31 11:23:50,440 - INFO - Done calling model_fn.
+2025-07-31 11:23:50,982 - INFO - Graph was finalized.
+2025-07-31 11:23:50,998 - INFO - Restoring parameters from pretrained_models\4stems\model
+2025-07-31 11:23:52,305 - INFO - Running local_init_op.
+2025-07-31 11:23:52,384 - INFO - Done running local_init_op.
+2025-07-31 11:25:01,774 - INFO - Spleeter separation completed successfully
+2025-07-31 11:25:01,774 - INFO - Separation completed. Mixing tracks...
+2025-07-31 11:25:33,735 - INFO - Successfully created output files for C:\Users\remov\workspace\bass-remover\test\Republic A 67 es Út.mp3
+2025-07-31 11:25:33,735 - INFO - Cleaning up temporary files...
+2025-07-31 11:25:33,773 - INFO - Temporary files cleaned up successfully
+2025-07-31 11:25:33,783 - INFO - Processing: C:\Users\remov\workspace\bass-remover\test\Republic Ha Itt Lennél Velem.mp3
+2025-07-31 11:25:33,783 - INFO - Initializing Spleeter separator...
+2025-07-31 11:25:33,925 - INFO - Spleeter separator initialized successfully
+2025-07-31 11:25:33,925 - INFO - Running Spleeter separation...
+2025-07-31 11:25:35,255 - INFO - Using config: {'_model_dir': 'pretrained_models\\4stems', '_tf_random_seed': None, '_save_summary_steps': 100, '_save_checkpoints_steps': None, '_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  per_process_gpu_memory_fraction: 0.7
+}
+, '_keep_checkpoint_max': 5, '_keep_checkpoint_every_n_hours': 10000, '_log_step_count_steps': 100, '_train_distribute': None, '_device_fn': None, '_protocol': None, '_eval_distribute': None, '_experimental_distribute': None, '_experimental_max_worker_delay_secs': None, '_session_creation_timeout_secs': 7200, '_checkpoint_save_graph_def': True, '_service': None, '_cluster_spec': ClusterSpec({}), '_task_type': 'worker', '_task_id': 0, '_global_id_in_cluster': 0, '_master': '', '_evaluation_master': '', '_is_chief': True, '_num_ps_replicas': 0, '_num_worker_replicas': 1}
+2025-07-31 11:25:35,481 - INFO - Calling model_fn.
+2025-07-31 11:25:35,796 - INFO - Apply unet for vocals_spectrogram
+2025-07-31 11:25:38,251 - INFO - Apply unet for drums_spectrogram
+2025-07-31 11:25:40,537 - INFO - Apply unet for bass_spectrogram
+2025-07-31 11:25:42,826 - INFO - Apply unet for other_spectrogram
+2025-07-31 11:25:46,012 - INFO - Done calling model_fn.
+2025-07-31 11:25:48,129 - INFO - Graph was finalized.
+2025-07-31 11:25:48,133 - INFO - Restoring parameters from pretrained_models\4stems\model
+2025-07-31 11:25:50,103 - INFO - Running local_init_op.
+2025-07-31 11:25:50,219 - INFO - Done running local_init_op.
+2025-07-31 11:26:13,161 - INFO - Spleeter separation completed successfully
+2025-07-31 11:26:13,161 - INFO - Separation completed. Mixing tracks...
+2025-07-31 11:26:32,466 - INFO - Successfully created output files for C:\Users\remov\workspace\bass-remover\test\Republic Ha Itt Lennél Velem.mp3
+2025-07-31 11:26:32,466 - INFO - Cleaning up temporary files...
+2025-07-31 11:26:32,483 - INFO - Temporary files cleaned up successfully
+2025-07-31 11:26:32,499 - INFO - Processing: C:\Users\remov\workspace\bass-remover\test\Republic Hozd El Azt A Napot.mp3
+2025-07-31 11:26:32,499 - INFO - Initializing Spleeter separator...
+2025-07-31 11:26:32,574 - INFO - Spleeter separator initialized successfully
+2025-07-31 11:26:32,574 - INFO - Running Spleeter separation...
+2025-07-31 11:26:33,709 - INFO - Using config: {'_model_dir': 'pretrained_models\\4stems', '_tf_random_seed': None, '_save_summary_steps': 100, '_save_checkpoints_steps': None, '_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  per_process_gpu_memory_fraction: 0.7
+}
+, '_keep_checkpoint_max': 5, '_keep_checkpoint_every_n_hours': 10000, '_log_step_count_steps': 100, '_train_distribute': None, '_device_fn': None, '_protocol': None, '_eval_distribute': None, '_experimental_distribute': None, '_experimental_max_worker_delay_secs': None, '_session_creation_timeout_secs': 7200, '_checkpoint_save_graph_def': True, '_service': None, '_cluster_spec': ClusterSpec({}), '_task_type': 'worker', '_task_id': 0, '_global_id_in_cluster': 0, '_master': '', '_evaluation_master': '', '_is_chief': True, '_num_ps_replicas': 0, '_num_worker_replicas': 1}
+2025-07-31 11:26:33,773 - INFO - Calling model_fn.
+2025-07-31 11:26:33,976 - INFO - Apply unet for vocals_spectrogram
+2025-07-31 11:26:36,183 - INFO - Apply unet for drums_spectrogram
+2025-07-31 11:26:38,400 - INFO - Apply unet for bass_spectrogram
+2025-07-31 11:26:41,182 - INFO - Apply unet for other_spectrogram
+2025-07-31 11:26:44,886 - INFO - Done calling model_fn.
+2025-07-31 11:26:46,450 - INFO - Graph was finalized.
+2025-07-31 11:26:46,459 - INFO - Restoring parameters from pretrained_models\4stems\model
+2025-07-31 11:26:48,611 - INFO - Running local_init_op.
+2025-07-31 11:26:48,757 - INFO - Done running local_init_op.
+2025-07-31 11:27:21,608 - INFO - Spleeter separation completed successfully
+2025-07-31 11:27:21,623 - INFO - Separation completed. Mixing tracks...
+2025-07-31 11:27:44,096 - INFO - Successfully created output files for C:\Users\remov\workspace\bass-remover\test\Republic Hozd El Azt A Napot.mp3
+2025-07-31 11:27:44,096 - INFO - Cleaning up temporary files...
+2025-07-31 11:27:44,110 - INFO - Temporary files cleaned up successfully

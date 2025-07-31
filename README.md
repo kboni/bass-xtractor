@@ -141,9 +141,10 @@ extract_bass.bat --file song1.mp3 --file song2.mp3 --output_folder /path/to/outp
 - `--output_folder`: Required. Specify the output folder for processed files
 - `--ffmpeg path`: Optional. Path to ffmpeg executable (if not in PATH)
 - `--nocleanup`: Optional. Skip cleanup of temporary files (useful for debugging)
-- `--novocals`: Optional. Exclude vocals from NOBASS mix
-- `--nodrums`: Optional. Exclude drums from NOBASS mix
-- `--noother`: Optional. Exclude other instruments from NOBASS mix
+- `--bassonly`: Optional. Also save bass track to BASSONLY folder (default behavior only creates NOBASS)
+- `--novocals`: Optional. Remove vocals and save to NOVOCALS folder
+- `--nodrums`: Optional. Remove drums and save to NODRUMS folder
+- `--noother`: Optional. Remove other instruments and save to NOOTHER folder
 
 ## Error Logging
 
@@ -183,21 +184,36 @@ extract_bass --file song.mp3 --output_folder ./output --ffmpeg "/usr/local/bin/f
 # Skip cleanup to preserve temporary files (useful for debugging)
 extract_bass --folder ./music --output_folder ./output --nocleanup
 
-# Exclude specific tracks from NOBASS mix
+# Create bass-only track
+extract_bass --file song.mp3 --output_folder ./output --bassonly
+
+# Remove specific tracks and save to separate folders
 extract_bass --file song.mp3 --output_folder ./output --novocals
 extract_bass --file song.mp3 --output_folder ./output --nodrums
 extract_bass --file song.mp3 --output_folder ./output --noother
 
-# Combine multiple exclusions
-extract_bass --file song.mp3 --output_folder ./output --novocals --nodrums
+# Combine multiple options
+extract_bass --file song.mp3 --output_folder ./output --bassonly --novocals
 ```
 
 ## Output
 
-For each input file, the script will create two output files in separate subfolders:
+For each input file, the script will create output files in separate subfolders:
 
-1. `{output_folder}/NOBASS/{original_filename}.mp3` - The original song without bass (drums + vocals + other instruments mixed together)
-2. `{output_folder}/BASSONLY/{original_filename}.mp3` - Only the bass track extracted from the original song
+**Default behavior:**
+- `{output_folder}/NOBASS/{original_filename}.mp3` - The original song without bass (drums + vocals + other instruments mixed together)
+
+**With `--bassonly`:**
+- `{output_folder}/BASSONLY/{original_filename}.mp3` - Only the bass track extracted from the original song
+
+**With `--novocals`:**
+- `{output_folder}/NOVOCALS/{original_filename}.mp3` - The original song without vocals (bass + drums + other instruments mixed together)
+
+**With `--nodrums`:**
+- `{output_folder}/NODRUMS/{original_filename}.mp3` - The original song without drums (bass + vocals + other instruments mixed together)
+
+**With `--noother`:**
+- `{output_folder}/NOOTHER/{original_filename}.mp3` - The original song without other instruments (bass + vocals + drums mixed together)
 
 ## How it works
 

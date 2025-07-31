@@ -28,6 +28,9 @@ class BassExtractorGUI:
         self.root.geometry("800x600")
         self.root.resizable(True, True)
         
+        # Bind cleanup on window close
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
         # Configure style for better appearance
         self.style = ttk.Style()
         
@@ -50,15 +53,41 @@ class BassExtractorGUI:
         self.setup_message_handling()
     
     def create_widgets(self):
-        # Main frame
-        main_frame = ttk.Frame(self.root, padding="10")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Create a canvas with scrollbar
+        canvas = tk.Canvas(self.root)
+        scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Bind mouse wheel scrolling
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        # Store the mousewheel function for cleanup
+        self._on_mousewheel = _on_mousewheel
         
         # Configure grid weights
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
+        canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        # Main frame inside scrollable frame
+        main_frame = ttk.Frame(scrollable_frame, padding="10")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # Configure main frame grid weights
         main_frame.columnconfigure(1, weight=1)
-        main_frame.rowconfigure(4, weight=1)
+        main_frame.rowconfigure(5, weight=1)
         
         # Title
         title_label = ttk.Label(main_frame, text="Bass Extractor", font=("Arial", 16, "bold"))
@@ -114,9 +143,41 @@ class BassExtractorGUI:
         ttk.Checkbutton(options_frame, text="Skip cleanup (preserve temporary files)", 
                        variable=self.no_cleanup).pack(anchor=tk.W)
         
+        # Additional options frame
+        additional_options_frame = ttk.LabelFrame(main_frame, text="Output Options", padding="10")
+        additional_options_frame.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        
+        # Create a frame for checkboxes with better layout
+        checkbox_frame = ttk.Frame(additional_options_frame)
+        checkbox_frame.pack(fill=tk.X, expand=True)
+        
+        # First row of checkboxes
+        row1_frame = ttk.Frame(checkbox_frame)
+        row1_frame.pack(fill=tk.X, pady=(0, 5))
+        
+        self.bassonly_var = tk.BooleanVar()
+        ttk.Checkbutton(row1_frame, text="Bass Only (save to BASSONLY folder)", 
+                       variable=self.bassonly_var).pack(side=tk.LEFT, padx=(0, 20))
+        
+        self.novocals_var = tk.BooleanVar()
+        ttk.Checkbutton(row1_frame, text="No Vocals (save to NOVOCALS folder)", 
+                       variable=self.novocals_var).pack(side=tk.LEFT, padx=(0, 20))
+        
+        # Second row of checkboxes
+        row2_frame = ttk.Frame(checkbox_frame)
+        row2_frame.pack(fill=tk.X)
+        
+        self.nodrums_var = tk.BooleanVar()
+        ttk.Checkbutton(row2_frame, text="No Drums (save to NODRUMS folder)", 
+                       variable=self.nodrums_var).pack(side=tk.LEFT, padx=(0, 20))
+        
+        self.noother_var = tk.BooleanVar()
+        ttk.Checkbutton(row2_frame, text="No Other (save to NOOTHER folder)", 
+                       variable=self.noother_var).pack(side=tk.LEFT, padx=(0, 20))
+        
         # Progress section
         progress_frame = ttk.LabelFrame(main_frame, text="Progress", padding="10")
-        progress_frame.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        progress_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
         progress_frame.columnconfigure(0, weight=1)
         
         self.progress_var = tk.StringVar(value="Ready")
@@ -127,7 +188,7 @@ class BassExtractorGUI:
         
         # Log section
         log_frame = ttk.LabelFrame(main_frame, text="Log", padding="10")
-        log_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        log_frame.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
         log_frame.columnconfigure(0, weight=1)
         log_frame.rowconfigure(0, weight=1)
         
@@ -136,7 +197,7 @@ class BassExtractorGUI:
         
         # Control buttons
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=5, column=0, columnspan=3, pady=(10, 0))
+        button_frame.grid(row=6, column=0, columnspan=3, pady=(10, 0))
         
         self.start_button = ttk.Button(button_frame, text="Start Processing", command=self.start_processing)
         self.start_button.pack(side=tk.LEFT, padx=(0, 5))
@@ -147,7 +208,7 @@ class BassExtractorGUI:
         # Status bar
         self.status_var = tk.StringVar(value="Ready")
         status_bar = ttk.Label(main_frame, textvariable=self.status_var, relief=tk.SUNKEN)
-        status_bar.grid(row=6, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(10, 0))
+        status_bar.grid(row=7, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(10, 0))
     
     def setup_message_handling(self):
         """Setup message handling for thread communication"""
@@ -252,6 +313,16 @@ class BassExtractorGUI:
         count = len(self.input_files)
         self.status_var.set(f"Ready - {count} file(s) selected")
     
+    def cleanup(self):
+        """Clean up event bindings"""
+        if hasattr(self, '_on_mousewheel'):
+            self.root.unbind_all("<MouseWheel>")
+    
+    def on_closing(self):
+        """Handle window closing"""
+        self.cleanup()
+        self.root.destroy()
+    
     def start_processing(self):
         """Start the processing thread"""
         if not self.input_files:
@@ -305,7 +376,9 @@ class BassExtractorGUI:
                         AudioSegment.converter = self.ffmpeg_path.get()
                     
                     # Extract bass
-                    extract_bass_from_file(file_path, self.output_folder.get(), self.no_cleanup.get())
+                    extract_bass_from_file(file_path, self.output_folder.get(), self.no_cleanup.get(), 
+                                        self.novocals_var.get(), self.nodrums_var.get(), self.noother_var.get(), 
+                                        self.bassonly_var.get())
                     
                     self.message_queue.put({
                         'type': 'log',
