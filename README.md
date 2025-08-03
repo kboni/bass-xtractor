@@ -2,7 +2,26 @@
 
 A Python script and GUI to extract bass from audio files using command line interface and GUI. **This project is based on [Spleeter](https://github.com/deezer/spleeter)**, an open-source audio separation library by Deezer.
 
-**Testing Status**: The script and GUI are currently tested only on Windows. Linux and macOS compatibility is implemented but requires testing.
+**Testing Status**: The script and GUI are currently tested on Windows. Linux and macOS compatibility is implemented but requires testing.
+
+## ✨ **New Features (Latest Update)**
+
+### 🎵 **YouTube Download Support**
+- **Download YouTube videos** directly as MP3 files using pytubefix
+- **Multiple URL support** - process multiple YouTube videos at once
+- **Automatic conversion** to MP3 format using FFmpeg
+- **Integrated workflow** - downloaded videos are processed like local files
+
+### 📁 **DONE Folder Feature**
+- **Automatic file organization** - processed input files are moved to a `DONE` folder
+- **Timestamp handling** - prevents filename conflicts with automatic timestamps
+- **Clean workflow** - keeps original files organized after processing
+
+### 🖥️ **Enhanced GUI**
+- **Improved layout** - better space utilization, no empty areas
+- **YouTube URL input** - text area for entering multiple YouTube URLs
+- **Real-time validation** - validates YouTube URLs before processing
+- **Better error handling** - detailed error messages and debugging information
 
 ## Installation
 
@@ -32,25 +51,27 @@ This project requires Python 3.10.0. Spleeter is not compatible with higher Pyth
 
 1. Install required Python packages:
    ```bash
-   pip install pydub
+   pip install -r requirements.txt
    ```
 
-2. Install Spleeter:
+   Or install individually:
    ```bash
-   pip install spleeter
+   pip install pydub>=0.25.1
+   pip install spleeter>=2.3.0
+   pip install pytubefix>=15.0.0  # For YouTube download functionality
    ```
 
    **Note**: This project uses and relies on [Spleeter](https://github.com/deezer/spleeter) for audio separation. Visit their GitHub page for more information about the tool and its capabilities.
 
 ### FFmpeg Installation
 
-FFmpeg is required for audio processing. Installation depends on your operating system:
+FFmpeg is required for audio processing and YouTube video conversion. Installation depends on your operating system:
 
 #### Windows
 1. Download FFmpeg from [https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)
 2. Extract to a folder (e.g., `C:\ffmpeg`)
 3. Add the `bin` folder to your system PATH, OR
-4. Use the `--ffmpeg` argument to specify the path to ffmpeg.exe
+4. Use the GUI to specify the path to ffmpeg.exe
 
 **Note**: If you encounter issues installing Spleeter on Windows even after manual FFmpeg installation, try:
 ```bash
@@ -76,7 +97,7 @@ sudo apt install ffmpeg
 
 ## Usage
 
-### GUI Interface (Recommended for beginners)
+### GUI Interface (Recommended)
 
 The easiest way to use Bass Extractor is through the graphical interface:
 
@@ -104,13 +125,36 @@ gui/extract_bass_gui.bat
 python gui/extract_bass_gui.py
 ```
 
-The GUI provides:
-- Drag-and-drop file selection
-- Folder selection for batch processing
-- Real-time progress tracking
-- Live log output
-- Easy FFmpeg path configuration
-- Skip cleanup option
+### GUI Features
+
+The enhanced GUI provides:
+
+#### 📂 **File Management**
+- **Add Files** - Select individual MP3 files
+- **Add Folder** - Process all MP3 files in a folder
+- **Remove Selected** - Remove specific files from the list
+- **Clear All** - Clear all selected files
+
+#### 🎵 **YouTube Integration**
+- **YouTube URL Input** - Text area for entering multiple URLs (one per line)
+- **URL Validation** - Real-time validation of YouTube URLs
+- **Add YouTube URLs** - Validate and add URLs to processing list
+- **Clear YouTube URLs** - Remove all YouTube URLs
+
+#### ⚙️ **Processing Options**
+- **Output Folder** - Select where processed files will be saved
+- **FFmpeg Path** - Specify custom FFmpeg executable path
+- **Skip Cleanup** - Preserve temporary files for debugging
+- **Output Options**:
+  - **Bass Only** - Save to BASSONLY folder
+  - **No Vocals** - Save to NOVOCALS folder
+  - **No Drums** - Save to NODRUMS folder
+  - **No Other** - Save to NOOTHER folder
+
+#### 📊 **Progress Tracking**
+- **Real-time progress** - Shows current processing status
+- **Live log output** - Detailed processing information
+- **Status bar** - Shows file counts and processing state
 
 ### Command Line Interface
 
@@ -146,12 +190,37 @@ extract_bass.bat --file song1.mp3 --file song2.mp3 --output_folder /path/to/outp
 - `--nodrums`: Optional. Remove drums and save to NODRUMS folder
 - `--noother`: Optional. Remove other instruments and save to NOOTHER folder
 
+## YouTube Download Usage
+
+### Supported URL Formats
+- `https://www.youtube.com/watch?v=VIDEO_ID`
+- `https://youtu.be/VIDEO_ID`
+- `https://www.youtube.com/watch?v=VIDEO_ID`
+- `https://www.youtube.com/embed/VIDEO_ID`
+
+### How to Use YouTube Downloads
+
+1. **Launch the GUI**
+2. **Enter YouTube URLs** in the text area (one URL per line)
+3. **Click "Add YouTube URLs"** to validate and add them
+4. **Set output folder** and processing options
+5. **Click "Start Processing"**
+6. **Videos will be downloaded** as MP3 files first, then processed for bass extraction
+
+### Example YouTube URLs
+```
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+https://youtu.be/dQw4w9WgXcQ
+https://www.youtube.com/watch?v=jNQXAC9IVRw
+```
+
 ## Error Logging
 
 The script automatically logs all errors and processing information to `error.log` in the current directory. This includes:
 - Spleeter initialization errors
 - Audio separation failures
 - File processing errors
+- YouTube download errors
 - Cleanup issues
 - Processing statistics
 
@@ -162,6 +231,7 @@ Check this file if you encounter any issues during processing.
 - If `--folder` is specified, all `--file` arguments will be ignored
 - You must specify either `--folder` or `--file` (or multiple `--file` arguments)
 - The `--output_folder` argument is always required
+- YouTube URLs are processed in addition to local files
 
 ## Examples
 
@@ -196,9 +266,11 @@ extract_bass --file song.mp3 --output_folder ./output --noother
 extract_bass --file song.mp3 --output_folder ./output --bassonly --novocals
 ```
 
-## Output
+## Output Structure
 
 For each input file, the script will create output files in separate subfolders:
+
+### 📁 **Output Folders**
 
 **Default behavior:**
 - `{output_folder}/NOBASS/{original_filename}.mp3` - The original song without bass (drums + vocals + other instruments mixed together)
@@ -215,11 +287,58 @@ For each input file, the script will create output files in separate subfolders:
 **With `--noother`:**
 - `{output_folder}/NOOTHER/{original_filename}.mp3` - The original song without other instruments (bass + vocals + drums mixed together)
 
+### 📁 **DONE Folder**
+- `{output_folder}/DONE/{original_filename}.mp3` - Original input files moved here after processing
+- `{output_folder}/DONE/{original_filename}_YYYYMMDD_HHMMSS.mp3` - If filename conflicts exist
+
 ## How it works
 
-1. Uses Spleeter Python API to separate the audio into 4 stems: bass, drums, vocals, and other
-2. Mixes drums, vocals, and other together to create the "no bass" version
-3. Extracts the bass track separately
-4. Exports both files in MP3 format to the output folder
-5. Cleans up temporary files automatically
-6. Logs all errors and processing information to `error.log` 
+1. **YouTube Download** (if URLs provided):
+   - Downloads YouTube videos using pytubefix
+   - Converts to MP3 format using FFmpeg
+   - Adds downloaded files to processing list
+
+2. **Audio Separation**:
+   - Uses Spleeter Python API to separate the audio into 4 stems: bass, drums, vocals, and other
+   - Mixes drums, vocals, and other together to create the "no bass" version
+   - Extracts the bass track separately
+
+3. **File Processing**:
+   - Exports files in MP3 format to the output folder
+   - Creates appropriate subfolders based on options
+   - Moves original input files to DONE folder
+
+4. **Cleanup**:
+   - Cleans up temporary files automatically (unless --nocleanup is specified)
+   - Logs all errors and processing information to `error.log`
+
+## Troubleshooting
+
+### YouTube Download Issues
+- **Install pytubefix**: `pip install pytubefix`
+- **Update pytubefix**: `pip install --upgrade pytubefix`
+- **Check internet connection** - required for downloads
+- **Try different videos** - some may be restricted
+- **Check FFmpeg installation** - required for video conversion
+
+### General Issues
+- **Check Python version**: Must be 3.10.0
+- **Verify FFmpeg installation**: `ffmpeg -version`
+- **Check error.log**: Detailed error information
+- **Try --nocleanup**: Preserves temporary files for debugging
+
+## Legal Considerations
+
+- **YouTube Terms**: Users must comply with YouTube's terms of service
+- **Copyright**: Users are responsible for respecting copyright laws
+- **Personal Use**: Intended for personal use only
+- **No Redistribution**: Downloaded content should not be redistributed
+
+## Requirements Summary
+
+- **Python**: 3.10.0 (required for Spleeter compatibility)
+- **pydub**: `pip install pydub>=0.25.1`
+- **spleeter**: `pip install spleeter>=2.3.0`
+- **pytubefix**: `pip install pytubefix>=15.0.0` (for YouTube functionality)
+- **FFmpeg**: Must be installed and in PATH (or specify path in GUI)
+- **Internet Connection**: Required for YouTube downloads 
