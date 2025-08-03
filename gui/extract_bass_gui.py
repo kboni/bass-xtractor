@@ -35,9 +35,11 @@ except ImportError:
 class BassExtractorGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Bass Extractor GUI")
-        self.root.geometry("800x600")
+        self.root.title("Bass Xtractor GUI")
+        self.root.geometry("730x700")  # Slightly larger default size
         self.root.resizable(True, True)
+        self.root.minsize(730, 500) # Set minimum window size
+        self.root.maxsize(730, 800) 
         
         # Bind cleanup on window close
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -87,19 +89,31 @@ class BassExtractorGUI:
         # Store the mousewheel function for cleanup
         self._on_mousewheel = _on_mousewheel
         
-        # Configure grid weights
+        # Configure grid weights for better space utilization
         self.root.columnconfigure(0, weight=1)
+        self.root.columnconfigure(1, weight=0)  # Scrollbar takes minimal space
         self.root.rowconfigure(0, weight=1)
         canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        # Configure canvas to expand properly
+        canvas.configure(width=800)  # Set a reasonable default width
+        
+        # Bind resize event to update canvas width
+        def on_resize(event):
+            canvas.configure(width=event.width - 20)  # Account for scrollbar width
+        
+        self.root.bind('<Configure>', on_resize)
         
         # Main frame inside scrollable frame
         main_frame = ttk.Frame(scrollable_frame, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Configure main frame grid weights
-        main_frame.columnconfigure(1, weight=1)
-        main_frame.rowconfigure(5, weight=1)
+        # Configure main frame grid weights for better space utilization
+        main_frame.columnconfigure(0, weight=0)  # Labels
+        main_frame.columnconfigure(1, weight=1)  # Input fields
+        main_frame.columnconfigure(2, weight=0)  # Buttons
+        main_frame.rowconfigure(5, weight=1)     # Log section
         
         # Title
         title_label = ttk.Label(main_frame, text="Bass Extractor", font=("Arial", 16, "bold"))
@@ -108,7 +122,9 @@ class BassExtractorGUI:
         # Input section
         input_frame = ttk.LabelFrame(main_frame, text="Input Files & YouTube URLs", padding="10")
         input_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
-        input_frame.columnconfigure(1, weight=1)
+        input_frame.columnconfigure(0, weight=0)  # Labels
+        input_frame.columnconfigure(1, weight=1)  # Input fields
+        input_frame.columnconfigure(2, weight=0)  # Scrollbars
         
         # File selection
         ttk.Label(input_frame, text="Input Files:").grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
@@ -153,7 +169,9 @@ class BassExtractorGUI:
         # Output section
         output_frame = ttk.LabelFrame(main_frame, text="Output Settings", padding="10")
         output_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
-        output_frame.columnconfigure(1, weight=1)
+        output_frame.columnconfigure(0, weight=0)  # Labels
+        output_frame.columnconfigure(1, weight=1)  # Input fields
+        output_frame.columnconfigure(2, weight=0)  # Buttons
         
         # Output folder
         ttk.Label(output_frame, text="Output Folder:").grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
@@ -210,6 +228,7 @@ class BassExtractorGUI:
         progress_frame = ttk.LabelFrame(main_frame, text="Progress", padding="10")
         progress_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
         progress_frame.columnconfigure(0, weight=1)
+        progress_frame.rowconfigure(1, weight=0)
         
         self.progress_var = tk.StringVar(value="Ready")
         ttk.Label(progress_frame, textvariable=self.progress_var).grid(row=0, column=0, sticky=tk.W)
