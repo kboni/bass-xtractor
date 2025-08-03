@@ -12,3 +12,4 @@ test
 bass_extractor_output
 out
 error.log
+gui/gui_config.json

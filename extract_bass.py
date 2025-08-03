@@ -8,6 +8,7 @@ import os
 import sys
 import shutil
 import logging
+from datetime import datetime
 from pathlib import Path
 from pydub import AudioSegment
 from mix_wavs import mix_wavs
@@ -127,6 +128,29 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False, novocals=
                 print(f"Warning: {error_msg}")
         else:
             logger.info("Skipping cleanup - temporary files preserved")
+        
+        # Move input file to DONE folder
+        try:
+            done_folder = os.path.join(output_folder, "DONE")
+            os.makedirs(done_folder, exist_ok=True)
+            
+            input_filename = os.path.basename(input_file)
+            done_file_path = os.path.join(done_folder, input_filename)
+            
+            # If file already exists in DONE folder, add timestamp
+            if os.path.exists(done_file_path):
+                name, ext = os.path.splitext(input_filename)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                done_file_path = os.path.join(done_folder, f"{name}_{timestamp}{ext}")
+            
+            shutil.move(input_file, done_file_path)
+            logger.info(f"Input file moved to DONE folder: {done_file_path}")
+            print(f"  - Input file moved to: {done_file_path}")
+            
+        except Exception as e:
+            error_msg = f"Failed to move input file to DONE folder: {str(e)}"
+            logger.error(error_msg)
+            print(f"Warning: {error_msg}")
         
     except Exception as e:
         error_msg = f"Unexpected error processing {input_file}: {str(e)}"
