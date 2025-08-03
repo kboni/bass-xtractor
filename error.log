@@ -249,3 +249,68 @@ Colocations handled automatically by placer.
 2025-07-31 11:27:44,096 - INFO - Successfully created output files for C:\Users\remov\workspace\bass-remover\test\Republic Hozd El Azt A Napot.mp3
 2025-07-31 11:27:44,096 - INFO - Cleaning up temporary files...
 2025-07-31 11:27:44,110 - INFO - Temporary files cleaned up successfully
+2025-08-03 14:18:19,196 - INFO - Processing: I:/My Drive/Pertlik practice\Plavi Orkestar - Bolje biti pijan nego star (Official Lyric Video).mp3
+2025-08-03 14:18:19,197 - INFO - Initializing Spleeter separator...
+2025-08-03 14:18:19,388 - INFO - Spleeter separator initialized successfully
+2025-08-03 14:18:19,389 - INFO - Running Spleeter separation...
+2025-08-03 14:18:23,816 - INFO - Using config: {'_model_dir': 'pretrained_models\\4stems', '_tf_random_seed': None, '_save_summary_steps': 100, '_save_checkpoints_steps': None, '_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  per_process_gpu_memory_fraction: 0.7
+}
+, '_keep_checkpoint_max': 5, '_keep_checkpoint_every_n_hours': 10000, '_log_step_count_steps': 100, '_train_distribute': None, '_device_fn': None, '_protocol': None, '_eval_distribute': None, '_experimental_distribute': None, '_experimental_max_worker_delay_secs': None, '_session_creation_timeout_secs': 7200, '_checkpoint_save_graph_def': True, '_service': None, '_cluster_spec': ClusterSpec({}), '_task_type': 'worker', '_task_id': 0, '_global_id_in_cluster': 0, '_master': '', '_evaluation_master': '', '_is_chief': True, '_num_ps_replicas': 0, '_num_worker_replicas': 1}
+2025-08-03 14:18:23,927 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\spleeter\separator.py:146: calling DatasetV2.from_generator (from tensorflow.python.data.ops.dataset_ops) with output_types is deprecated and will be removed in a future version.
+Instructions for updating:
+Use output_signature instead
+2025-08-03 14:18:23,931 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\spleeter\separator.py:146: calling DatasetV2.from_generator (from tensorflow.python.data.ops.dataset_ops) with output_shapes is deprecated and will be removed in a future version.
+Instructions for updating:
+Use output_signature instead
+2025-08-03 14:18:24,078 - INFO - Calling model_fn.
+2025-08-03 14:18:28,074 - INFO - Apply unet for vocals_spectrogram
+2025-08-03 14:18:28,527 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\keras\layers\normalization\batch_normalization.py:514: _colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+2025-08-03 14:18:31,219 - INFO - Apply unet for drums_spectrogram
+2025-08-03 14:18:33,889 - INFO - Apply unet for bass_spectrogram
+2025-08-03 14:18:36,627 - INFO - Apply unet for other_spectrogram
+2025-08-03 14:18:39,604 - INFO - Done calling model_fn.
+2025-08-03 14:18:40,344 - INFO - Graph was finalized.
+2025-08-03 14:18:40,358 - INFO - Restoring parameters from pretrained_models\4stems\model
+2025-08-03 14:18:42,726 - INFO - Running local_init_op.
+2025-08-03 14:18:42,833 - INFO - Done running local_init_op.
+2025-08-03 14:19:57,946 - INFO - Spleeter separation completed successfully
+2025-08-03 14:19:57,968 - INFO - Separation completed. Mixing tracks...
+2025-08-03 14:20:11,226 - INFO - Successfully created output files for I:/My Drive/Pertlik practice\Plavi Orkestar - Bolje biti pijan nego star (Official Lyric Video).mp3
+2025-08-03 14:20:11,228 - INFO - Cleaning up temporary files...
+2025-08-03 14:20:11,269 - INFO - Temporary files cleaned up successfully
+2025-08-03 14:33:38,362 - INFO - Processing: I:/My Drive/Pertlik practice\PRLJAVO KAZALIŠTE - UZALUD VAM TRUD (OFFICIAL VIDEO).mp3
+2025-08-03 14:33:38,364 - INFO - Initializing Spleeter separator...
+2025-08-03 14:33:38,444 - INFO - Spleeter separator initialized successfully
+2025-08-03 14:33:38,444 - INFO - Running Spleeter separation...
+2025-08-03 14:33:40,239 - INFO - Using config: {'_model_dir': 'pretrained_models\\4stems', '_tf_random_seed': None, '_save_summary_steps': 100, '_save_checkpoints_steps': None, '_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  per_process_gpu_memory_fraction: 0.7
+}
+, '_keep_checkpoint_max': 5, '_keep_checkpoint_every_n_hours': 10000, '_log_step_count_steps': 100, '_train_distribute': None, '_device_fn': None, '_protocol': None, '_eval_distribute': None, '_experimental_distribute': None, '_experimental_max_worker_delay_secs': None, '_session_creation_timeout_secs': 7200, '_checkpoint_save_graph_def': True, '_service': None, '_cluster_spec': ClusterSpec({}), '_task_type': 'worker', '_task_id': 0, '_global_id_in_cluster': 0, '_master': '', '_evaluation_master': '', '_is_chief': True, '_num_ps_replicas': 0, '_num_worker_replicas': 1}
+2025-08-03 14:33:40,274 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\spleeter\separator.py:146: calling DatasetV2.from_generator (from tensorflow.python.data.ops.dataset_ops) with output_types is deprecated and will be removed in a future version.
+Instructions for updating:
+Use output_signature instead
+2025-08-03 14:33:40,288 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\spleeter\separator.py:146: calling DatasetV2.from_generator (from tensorflow.python.data.ops.dataset_ops) with output_shapes is deprecated and will be removed in a future version.
+Instructions for updating:
+Use output_signature instead
+2025-08-03 14:33:40,376 - INFO - Calling model_fn.
+2025-08-03 14:33:42,550 - INFO - Apply unet for vocals_spectrogram
+2025-08-03 14:33:42,840 - WARNING - From C:\Users\remov\.pyenv\pyenv-win\versions\3.10.0\lib\site-packages\keras\layers\normalization\batch_normalization.py:514: _colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+2025-08-03 14:33:44,913 - INFO - Apply unet for drums_spectrogram
+2025-08-03 14:33:47,060 - INFO - Apply unet for bass_spectrogram
+2025-08-03 14:33:49,200 - INFO - Apply unet for other_spectrogram
+2025-08-03 14:33:51,366 - INFO - Done calling model_fn.
+2025-08-03 14:33:51,807 - INFO - Graph was finalized.
+2025-08-03 14:33:51,821 - INFO - Restoring parameters from pretrained_models\4stems\model
+2025-08-03 14:33:53,219 - INFO - Running local_init_op.
+2025-08-03 14:33:53,298 - INFO - Done running local_init_op.
+2025-08-03 14:34:28,347 - INFO - Spleeter separation completed successfully
+2025-08-03 14:34:28,351 - INFO - Separation completed. Mixing tracks...
+2025-08-03 14:34:39,112 - INFO - Successfully created output files for I:/My Drive/Pertlik practice\PRLJAVO KAZALIŠTE - UZALUD VAM TRUD (OFFICIAL VIDEO).mp3
+2025-08-03 14:34:39,113 - INFO - Cleaning up temporary files...
+2025-08-03 14:34:39,135 - INFO - Temporary files cleaned up successfully
+2025-08-03 14:34:39,164 - INFO - Input file moved to DONE folder: I:/My Drive/Pertlik practice\DONE\PRLJAVO KAZALIŠTE - UZALUD VAM TRUD (OFFICIAL VIDEO).mp3

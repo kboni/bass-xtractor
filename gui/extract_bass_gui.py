@@ -20,6 +20,17 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from extract_bass import extract_bass_from_file
 
+# Import YouTube downloader
+try:
+    from youtube_downloader import (
+        is_valid_youtube_url, 
+        download_multiple_youtube_urls, 
+        validate_youtube_urls
+    )
+    YOUTUBE_AVAILABLE = True
+except ImportError:
+    YOUTUBE_AVAILABLE = False
+
 
 class BassExtractorGUI:
     def __init__(self, root):
@@ -42,6 +53,7 @@ class BassExtractorGUI:
         
         # Variables
         self.input_files = []
+        self.youtube_urls = []
         self.output_folder = tk.StringVar()
         self.ffmpeg_path = tk.StringVar()
         self.no_cleanup = tk.BooleanVar()
@@ -94,7 +106,7 @@ class BassExtractorGUI:
         title_label.grid(row=0, column=0, columnspan=3, pady=(0, 20))
         
         # Input section
-        input_frame = ttk.LabelFrame(main_frame, text="Input Files", padding="10")
+        input_frame = ttk.LabelFrame(main_frame, text="Input Files & YouTube URLs", padding="10")
         input_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
         input_frame.columnconfigure(1, weight=1)
         
@@ -102,7 +114,7 @@ class BassExtractorGUI:
         ttk.Label(input_frame, text="Input Files:").grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
         
         # File listbox
-        self.file_listbox = tk.Listbox(input_frame, height=6, selectmode=tk.EXTENDED)
+        self.file_listbox = tk.Listbox(input_frame, height=4, selectmode=tk.EXTENDED)
         self.file_listbox.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 5))
         
         # Scrollbar for file listbox
@@ -118,6 +130,25 @@ class BassExtractorGUI:
         ttk.Button(file_buttons_frame, text="Add Folder", command=self.add_folder).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(file_buttons_frame, text="Remove Selected", command=self.remove_files).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(file_buttons_frame, text="Clear All", command=self.clear_files).pack(side=tk.LEFT)
+        
+        # YouTube URLs section
+        ttk.Label(input_frame, text="YouTube URLs:").grid(row=3, column=0, sticky=tk.W, pady=(10, 5))
+        
+        # YouTube URL text area
+        self.youtube_text = scrolledtext.ScrolledText(input_frame, height=4, wrap=tk.WORD)
+        self.youtube_text.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 5))
+        
+        # YouTube buttons frame
+        youtube_buttons_frame = ttk.Frame(input_frame)
+        youtube_buttons_frame.grid(row=5, column=0, columnspan=3, pady=(5, 0))
+        
+        if YOUTUBE_AVAILABLE:
+            ttk.Button(youtube_buttons_frame, text="Add YouTube URLs", command=self.add_youtube_urls).pack(side=tk.LEFT, padx=(0, 5))
+            ttk.Button(youtube_buttons_frame, text="Clear YouTube URLs", command=self.clear_youtube_urls).pack(side=tk.LEFT, padx=(0, 5))
+            ttk.Label(youtube_buttons_frame, text="(One URL per line)").pack(side=tk.LEFT, padx=(10, 0))
+        else:
+                                ttk.Label(youtube_buttons_frame, text="YouTube support not available. Install pytubefix: pip install pytubefix",
+                     foreground="red").pack(side=tk.LEFT)
         
         # Output section
         output_frame = ttk.LabelFrame(main_frame, text="Output Settings", padding="10")
@@ -285,6 +316,52 @@ class BassExtractorGUI:
         self.file_listbox.delete(0, tk.END)
         self.update_status()
     
+    def add_youtube_urls(self):
+        """Add YouTube URLs from the text area"""
+        if not YOUTUBE_AVAILABLE:
+            messagebox.showerror("Error", "YouTube support not available. Please install pytubefix: pip install pytubefix")
+            return
+        
+        # Get URLs from text area
+        urls_text = self.youtube_text.get(1.0, tk.END).strip()
+        if not urls_text:
+            messagebox.showwarning("Warning", "Please enter YouTube URLs first!")
+            return
+        
+        # Split by lines and filter empty lines
+        urls = [url.strip() for url in urls_text.split('\n') if url.strip()]
+        
+        # Validate URLs
+        valid_urls, invalid_urls = validate_youtube_urls(urls)
+        
+        if invalid_urls:
+            invalid_list = '\n'.join(invalid_urls[:5])  # Show first 5 invalid URLs
+            if len(invalid_urls) > 5:
+                invalid_list += f"\n... and {len(invalid_urls) - 5} more"
+            messagebox.showwarning("Warning", f"Some URLs are invalid:\n{invalid_list}")
+        
+        if not valid_urls:
+            messagebox.showwarning("Warning", "No valid YouTube URLs found!")
+            return
+        
+        # Add valid URLs to the list
+        for url in valid_urls:
+            if url not in self.youtube_urls:
+                self.youtube_urls.append(url)
+        
+        # Update the text area to show only valid URLs
+        self.youtube_text.delete(1.0, tk.END)
+        self.youtube_text.insert(1.0, '\n'.join(self.youtube_urls))
+        
+        self.update_status()
+        messagebox.showinfo("Success", f"Added {len(valid_urls)} valid YouTube URLs")
+    
+    def clear_youtube_urls(self):
+        """Clear all YouTube URLs"""
+        self.youtube_urls.clear()
+        self.youtube_text.delete(1.0, tk.END)
+        self.update_status()
+    
     def browse_output_folder(self):
         """Browse for output folder"""
         folder = filedialog.askdirectory(title="Select output folder")
@@ -310,8 +387,18 @@ class BassExtractorGUI:
     
     def update_status(self):
         """Update status bar with file count"""
-        count = len(self.input_files)
-        self.status_var.set(f"Ready - {count} file(s) selected")
+        file_count = len(self.input_files)
+        youtube_count = len(self.youtube_urls)
+        total_count = file_count + youtube_count
+        
+        if file_count > 0 and youtube_count > 0:
+            self.status_var.set(f"Ready - {file_count} file(s) + {youtube_count} YouTube URL(s) selected")
+        elif file_count > 0:
+            self.status_var.set(f"Ready - {file_count} file(s) selected")
+        elif youtube_count > 0:
+            self.status_var.set(f"Ready - {youtube_count} YouTube URL(s) selected")
+        else:
+            self.status_var.set("Ready - No files or URLs selected")
     
     def cleanup(self):
         """Clean up event bindings"""
@@ -325,8 +412,8 @@ class BassExtractorGUI:
     
     def start_processing(self):
         """Start the processing thread"""
-        if not self.input_files:
-            messagebox.showwarning("Warning", "Please select input files first!")
+        if not self.input_files and not self.youtube_urls:
+            messagebox.showwarning("Warning", "Please select input files or YouTube URLs first!")
             return
         
         if not self.output_folder.get():
@@ -355,9 +442,97 @@ class BassExtractorGUI:
     def process_files(self):
         """Process files in a separate thread"""
         try:
-            total_files = len(self.input_files)
+            all_files = self.input_files.copy()
+            youtube_download_success = False
             
-            for i, file_path in enumerate(self.input_files, 1):
+            # Download YouTube videos if any
+            if self.youtube_urls and YOUTUBE_AVAILABLE:
+                self.message_queue.put({
+                    'type': 'log',
+                    'text': f"Starting YouTube download for {len(self.youtube_urls)} URLs..."
+                })
+                
+                self.message_queue.put({
+                    'type': 'progress',
+                    'text': f"Downloading {len(self.youtube_urls)} YouTube video(s)..."
+                })
+                
+                try:
+                    # Download YouTube videos
+                    downloaded_files = download_multiple_youtube_urls(
+                        self.youtube_urls, 
+                        self.output_folder.get(), 
+                        self.ffmpeg_path.get() if self.ffmpeg_path.get() else None
+                    )
+                    
+                    self.message_queue.put({
+                        'type': 'log',
+                        'text': f"Download completed. Got {len(downloaded_files)} files: {downloaded_files}"
+                    })
+                    
+                    # Add downloaded files to the processing list
+                    all_files.extend(downloaded_files)
+                    youtube_download_success = True
+                    
+                    self.message_queue.put({
+                        'type': 'log',
+                        'text': f"✓ Downloaded {len(downloaded_files)} YouTube video(s)"
+                    })
+                    
+                except Exception as e:
+                    error_msg = str(e)
+                    self.message_queue.put({
+                        'type': 'log',
+                        'text': f"✗ Error downloading YouTube videos: {error_msg}"
+                    })
+                    
+                    # Check if it's a pytubefix issue
+                    if "HTTP Error 400" in error_msg or "Bad Request" in error_msg:
+                        self.message_queue.put({
+                            'type': 'log',
+                            'text': "💡 Tip: Try updating pytubefix: pip install --upgrade pytubefix"
+                        })
+                    
+                    self.message_queue.put({
+                        'type': 'log',
+                        'text': "⚠️ Continuing with local files only (if any)"
+                    })
+                    # Continue with local files only
+            elif self.youtube_urls and not YOUTUBE_AVAILABLE:
+                self.message_queue.put({
+                    'type': 'log',
+                    'text': f"⚠️ YouTube URLs provided ({len(self.youtube_urls)}) but pytube not available. Skipping YouTube downloads."
+                })
+            
+            # Process all files (local + downloaded)
+            total_files = len(all_files)
+            
+            # Debug logging
+            self.message_queue.put({
+                'type': 'log',
+                'text': f"Debug: {len(self.input_files)} local files, {len(self.youtube_urls)} YouTube URLs, {total_files} total files to process"
+            })
+            
+            # Check if we have anything to process
+            if total_files == 0:
+                if self.youtube_urls and not youtube_download_success:
+                    self.message_queue.put({
+                        'type': 'error',
+                        'text': "YouTube download failed and no local files provided. No files to process."
+                    })
+                elif self.youtube_urls and youtube_download_success:
+                    self.message_queue.put({
+                        'type': 'error',
+                        'text': "YouTube download completed but no files were downloaded. No files to process."
+                    })
+                else:
+                    self.message_queue.put({
+                        'type': 'error',
+                        'text': "No files to process"
+                    })
+                return
+            
+            for i, file_path in enumerate(all_files, 1):
                 # Check if processing was stopped
                 if hasattr(self, 'stop_processing_flag') and self.stop_processing_flag:
                     break
