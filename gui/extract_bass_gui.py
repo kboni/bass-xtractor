@@ -31,6 +31,15 @@ try:
 except ImportError:
     YOUTUBE_AVAILABLE = False
 
+# Import pitch shifting functionality
+try:
+    from pitch_shifter import get_note_names, validate_note
+    PITCH_SHIFT_AVAILABLE = True
+    NOTE_NAMES = get_note_names()
+except ImportError:
+    PITCH_SHIFT_AVAILABLE = False
+    NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+
 
 class BassExtractorGUI:
     def __init__(self, root):
@@ -59,6 +68,11 @@ class BassExtractorGUI:
         self.output_folder = tk.StringVar()
         self.ffmpeg_path = tk.StringVar()
         self.no_cleanup = tk.BooleanVar()
+        
+        # Pitch shift variables
+        self.input_pitch = tk.StringVar(value="C")
+        self.output_pitch = tk.StringVar(value="C")
+        self.enable_pitch_shift = tk.BooleanVar()
         
         # Message queue for thread communication
         self.message_queue = queue.Queue()
@@ -224,9 +238,38 @@ class BassExtractorGUI:
         ttk.Checkbutton(row2_frame, text="No Other (save to NOOTHER folder)", 
                        variable=self.noother_var).pack(side=tk.LEFT, padx=(0, 20))
         
+        # Pitch shift options frame
+        pitch_shift_frame = ttk.LabelFrame(main_frame, text="Pitch Shift Options", padding="10")
+        pitch_shift_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        pitch_shift_frame.columnconfigure(0, weight=0)  # Labels
+        pitch_shift_frame.columnconfigure(1, weight=1)  # Dropdowns
+        pitch_shift_frame.columnconfigure(2, weight=0)  # Spacing
+        
+        # Enable pitch shift checkbox
+        ttk.Checkbutton(pitch_shift_frame, text="Enable Pitch Shifting", 
+                       variable=self.enable_pitch_shift).grid(row=0, column=0, columnspan=3, sticky=tk.W, pady=(0, 10))
+        
+        # Input pitch selection
+        ttk.Label(pitch_shift_frame, text="Input Pitch:").grid(row=1, column=0, sticky=tk.W, pady=(0, 5))
+        input_pitch_combo = ttk.Combobox(pitch_shift_frame, textvariable=self.input_pitch, values=NOTE_NAMES, state="readonly", width=10)
+        input_pitch_combo.grid(row=2, column=0, sticky=tk.W, pady=(0, 10))
+        
+        # Output pitch selection
+        ttk.Label(pitch_shift_frame, text="Output Pitch:").grid(row=1, column=1, sticky=tk.W, padx=(20, 0), pady=(0, 5))
+        output_pitch_combo = ttk.Combobox(pitch_shift_frame, textvariable=self.output_pitch, values=NOTE_NAMES, state="readonly", width=10)
+        output_pitch_combo.grid(row=2, column=1, sticky=tk.W, padx=(20, 0), pady=(0, 10))
+        
+        # Pitch shift info
+        if PITCH_SHIFT_AVAILABLE:
+            ttk.Label(pitch_shift_frame, text="Shifts all tracks from input pitch to output pitch", 
+                     foreground="gray").grid(row=3, column=0, columnspan=3, sticky=tk.W)
+        else:
+            ttk.Label(pitch_shift_frame, text="Pitch shifting not available", 
+                     foreground="red").grid(row=3, column=0, columnspan=3, sticky=tk.W)
+        
         # Progress section
         progress_frame = ttk.LabelFrame(main_frame, text="Progress", padding="10")
-        progress_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        progress_frame.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
         progress_frame.columnconfigure(0, weight=1)
         progress_frame.rowconfigure(1, weight=0)
         
@@ -238,7 +281,7 @@ class BassExtractorGUI:
         
         # Log section
         log_frame = ttk.LabelFrame(main_frame, text="Log", padding="10")
-        log_frame.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        log_frame.grid(row=6, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
         log_frame.columnconfigure(0, weight=1)
         log_frame.rowconfigure(0, weight=1)
         
@@ -247,7 +290,7 @@ class BassExtractorGUI:
         
         # Control buttons
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=6, column=0, columnspan=3, pady=(10, 0))
+        button_frame.grid(row=7, column=0, columnspan=3, pady=(10, 0))
         
         self.start_button = ttk.Button(button_frame, text="Start Processing", command=self.start_processing)
         self.start_button.pack(side=tk.LEFT, padx=(0, 5))
@@ -258,7 +301,7 @@ class BassExtractorGUI:
         # Status bar
         self.status_var = tk.StringVar(value="Ready")
         status_bar = ttk.Label(main_frame, textvariable=self.status_var, relief=tk.SUNKEN)
-        status_bar.grid(row=7, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(10, 0))
+        status_bar.grid(row=8, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(10, 0))
     
     def setup_message_handling(self):
         """Setup message handling for thread communication"""
@@ -569,10 +612,18 @@ class BassExtractorGUI:
                         from pydub import AudioSegment
                         AudioSegment.converter = self.ffmpeg_path.get()
                     
+                    # Get pitch shift parameters
+                    input_pitch = None
+                    output_pitch = None
+                    if self.enable_pitch_shift.get() and PITCH_SHIFT_AVAILABLE:
+                        input_pitch = self.input_pitch.get()
+                        output_pitch = self.output_pitch.get()
+                    
                     # Extract bass
                     extract_bass_from_file(file_path, self.output_folder.get(), self.no_cleanup.get(), 
                                         self.novocals_var.get(), self.nodrums_var.get(), self.noother_var.get(), 
-                                        self.bassonly_var.get())
+                                        self.bassonly_var.get(), input_pitch, output_pitch, 
+                                        self.ffmpeg_path.get() if self.ffmpeg_path.get() else None)
                     
                     self.message_queue.put({
                         'type': 'log',

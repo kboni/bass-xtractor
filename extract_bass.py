@@ -14,8 +14,15 @@ from pydub import AudioSegment
 from mix_wavs import mix_wavs
 from spleeter.separator import Separator
 
+# Import pitch shifting functionality
+try:
+    from pitch_shifter import process_audio_with_pitch_shift, validate_note
+    PITCH_SHIFT_AVAILABLE = True
+except ImportError:
+    PITCH_SHIFT_AVAILABLE = False
 
-def extract_bass_from_file(input_file, output_folder, nocleanup=False, novocals=False, nodrums=False, noother=False, bassonly=False):
+
+def extract_bass_from_file(input_file, output_folder, nocleanup=False, novocals=False, nodrums=False, noother=False, bassonly=False, input_pitch=None, output_pitch=None, ffmpeg_path=None):
     """
     Extract bass from a single audio file using Spleeter.
     
@@ -23,6 +30,9 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False, novocals=
         input_file (str): Path to input audio file
         output_folder (str): Path to output folder
         nocleanup (bool): Whether to skip cleanup of temporary files
+        input_pitch (str, optional): Input pitch note (e.g., 'C', 'D', etc.)
+        output_pitch (str, optional): Output pitch note (e.g., 'C', 'D', etc.)
+        ffmpeg_path (str, optional): Path to FFmpeg executable for pitch shifting
     """
     # Setup logging
     logging.basicConfig(
@@ -88,7 +98,57 @@ def extract_bass_from_file(input_file, output_folder, nocleanup=False, novocals=
             print(f"Error: {error_msg}")
             return
         
-        logger.info(f"Separation completed. Mixing tracks...")
+        logger.info(f"Separation completed.")
+        
+        # Apply pitch shifting if requested
+        if input_pitch and output_pitch and PITCH_SHIFT_AVAILABLE:
+            logger.info(f"Applying pitch shift from {input_pitch} to {output_pitch}...")
+            
+            # Validate pitch notes
+            if not validate_note(input_pitch) or not validate_note(output_pitch):
+                error_msg = f"Invalid pitch notes: {input_pitch} or {output_pitch}"
+                logger.error(error_msg)
+                print(f"Error: {error_msg}")
+                return
+            
+            # Create temporary files for pitch-shifted tracks
+            temp_bass_path = os.path.join(separated_folder, "bass_pitched.wav")
+            temp_drums_path = os.path.join(separated_folder, "drums_pitched.wav")
+            temp_vocals_path = os.path.join(separated_folder, "vocals_pitched.wav")
+            temp_other_path = os.path.join(separated_folder, "other_pitched.wav")
+            
+            # Apply pitch shifting to each track
+            tracks_to_shift = [
+                (bass_path, temp_bass_path, "bass"),
+                (drums_path, temp_drums_path, "drums"),
+                (vocals_path, temp_vocals_path, "vocals"),
+                (other_path, temp_other_path, "other")
+            ]
+            
+            for input_track, output_track, track_name in tracks_to_shift:
+                try:
+                    if process_audio_with_pitch_shift(input_track, output_track, input_pitch, output_pitch, ffmpeg_path):
+                        logger.info(f"Successfully pitch-shifted {track_name} track")
+                    else:
+                        error_msg = f"Failed to pitch-shift {track_name} track"
+                        logger.error(error_msg)
+                        print(f"Error: {error_msg}")
+                        return
+                except Exception as e:
+                    error_msg = f"Error pitch-shifting {track_name} track: {str(e)}"
+                    logger.error(error_msg)
+                    print(f"Error: {error_msg}")
+                    return
+            
+            # Use pitch-shifted tracks for mixing
+            bass_path = temp_bass_path
+            drums_path = temp_drums_path
+            vocals_path = temp_vocals_path
+            other_path = temp_other_path
+            
+            logger.info("Pitch shifting completed successfully")
+        
+        logger.info("Mixing tracks...")
         
         # Use mix_wavs function to create the final outputs
         try:
