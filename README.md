@@ -1,6 +1,6 @@
 # Bass Extractor
 
-A Python script and GUI to extract bass from audio files using command line interface and GUI. **This project is based on [Spleeter](https://github.com/deezer/spleeter)**, an open-source audio separation library by Deezer.
+A Python script and GUI to extract bass from audio files or Youtube directly (single or in batches) and changing pitch, using command line interface and GUI. **This project is based on [Spleeter](https://github.com/deezer/spleeter)**, an open-source audio separation library by Deezer.
 
 **Testing Status**: The script and GUI are currently tested on Windows. Linux and macOS compatibility is implemented but requires testing.
 
@@ -12,16 +12,12 @@ A Python script and GUI to extract bass from audio files using command line inte
 - **Automatic conversion** to MP3 format using FFmpeg
 - **Integrated workflow** - downloaded videos are processed like local files
 
-### 📁 **DONE Folder Feature**
-- **Automatic file organization** - processed input files are moved to a `DONE` folder
-- **Timestamp handling** - prevents filename conflicts with automatic timestamps
-- **Clean workflow** - keeps original files organized after processing
+### 🎼 **Pitch Shift Support**
+- **Musical note selection** - choose input and output pitches (C, D, E, F, G, A, B, etc.)
+- **All tracks shifted** - bass, drums, vocals, and other instruments
+- **FFmpeg integration** - high-quality pitch shifting using FFmpeg
+- **Fallback support** - pydub fallback if FFmpeg not available
 
-### 🖥️ **Enhanced GUI**
-- **Improved layout** - better space utilization, no empty areas
-- **YouTube URL input** - text area for entering multiple YouTube URLs
-- **Real-time validation** - validates YouTube URLs before processing
-- **Better error handling** - detailed error messages and debugging information
 
 ## Installation
 
@@ -58,7 +54,7 @@ This project requires Python 3.10.0. Spleeter is not compatible with higher Pyth
    ```bash
    pip install pydub>=0.25.1
    pip install spleeter>=2.3.0
-   pip install pytubefix>=15.0.0  # For YouTube download functionality
+   pip install pytubefix>=9.4.1 # For YouTube download functionality
    ```
 
    **Note**: This project uses and relies on [Spleeter](https://github.com/deezer/spleeter) for audio separation. Visit their GitHub page for more information about the tool and its capabilities.
@@ -150,6 +146,10 @@ The enhanced GUI provides:
   - **No Vocals** - Save to NOVOCALS folder
   - **No Drums** - Save to NODRUMS folder
   - **No Other** - Save to NOOTHER folder
+- **Pitch Shift Options**:
+  - **Enable Pitch Shifting** - Toggle pitch shift functionality
+  - **Input Pitch** - Select source musical note (C, D, E, F, G, A, B, etc.)
+  - **Output Pitch** - Select target musical note (C, D, E, F, G, A, B, etc.)
 
 #### 📊 **Progress Tracking**
 - **Real-time progress** - Shows current processing status
@@ -213,6 +213,27 @@ https://www.youtube.com/watch?v=dQw4w9WgXcQ
 https://youtu.be/dQw4w9WgXcQ
 https://www.youtube.com/watch?v=jNQXAC9IVRw
 ```
+
+## Pitch Shifting Usage
+
+### How to Use Pitch Shifting
+
+1. **Enable Pitch Shifting** - Check the "Enable Pitch Shifting" checkbox
+2. **Select Input Pitch** - Choose the original key of your audio (e.g., C, D, E, F, G, A, B)
+3. **Select Output Pitch** - Choose the target key for the processed audio
+4. **Process files** - All tracks (bass, drums, vocals, other) will be pitch-shifted together
+
+### Supported Musical Notes
+- **Natural notes**: C, D, E, F, G, A, B
+- **Sharp notes**: C#, D#, F#, G#, A#
+- **All tracks shifted** - Bass, drums, vocals, and other instruments are all pitch-shifted together
+- **Quality processing** - Uses FFmpeg for high-quality pitch shifting with pydub fallback
+
+### Example Pitch Shifts
+- **C to D**: Transpose up by 2 semitones
+- **G to C**: Transpose down by 5 semitones
+- **A to F**: Transpose down by 3 semitones
+- **Same note**: No pitch shift applied (e.g., C to C)
 
 ## Error Logging
 
@@ -339,6 +360,6 @@ For each input file, the script will create output files in separate subfolders:
 - **Python**: 3.10.0 (required for Spleeter compatibility)
 - **pydub**: `pip install pydub>=0.25.1`
 - **spleeter**: `pip install spleeter>=2.3.0`
-- **pytubefix**: `pip install pytubefix>=15.0.0` (for YouTube functionality)
+- **pytubefix**: `pip install pytubefix>=9.4.1` (for YouTube functionality)
 - **FFmpeg**: Must be installed and in PATH (or specify path in GUI)
 - **Internet Connection**: Required for YouTube downloads 
