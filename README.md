@@ -97,6 +97,10 @@ sudo apt install ffmpeg
 
 The easiest way to use Bass Extractor is through the graphical interface:
 
+![Bass Extractor GUI](gui.png)
+
+*The Bass Extractor GUI showing file selection, YouTube URL input, pitch shift options, and processing controls.*
+
 #### Windows:
 ```bash
 gui/extract_bass_gui.bat
