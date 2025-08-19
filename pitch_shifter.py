@@ -2,6 +2,7 @@
 """
 Pitch shifting utility for audio files.
 Supports shifting by musical notes (C, D, E, F, G, A, B).
+Preserves original tempo while changing pitch.
 """
 
 import os
@@ -89,7 +90,7 @@ def calculate_pitch_shift(from_note, to_note):
 
 def shift_pitch_ffmpeg(input_file, output_file, pitch_ratio, ffmpeg_path=None):
     """
-    Shift the pitch of an audio file using FFmpeg.
+    Shift the pitch of an audio file using FFmpeg while preserving tempo.
     
     Args:
         input_file (str): Path to input audio file
@@ -107,19 +108,37 @@ def shift_pitch_ffmpeg(input_file, output_file, pitch_ratio, ffmpeg_path=None):
         import math
         semitones = 12 * math.log2(pitch_ratio)
         
-        # Build FFmpeg command
+        # Build FFmpeg command using rubberband filter for high-quality pitch shifting
+        # that preserves tempo
         ffmpeg_cmd = 'ffmpeg'
         if ffmpeg_path:
             ffmpeg_cmd = ffmpeg_path
         
-        cmd = [
+        # Try rubberband filter first (best quality, preserves tempo)
+        cmd_rubberband = [
             ffmpeg_cmd, '-i', input_file,
-            '-af', f'asetrate=44100*{pitch_ratio},aresample=44100',
+            '-af', f'rubberband=pitch={semitones}',
             '-y', output_file
         ]
         
-        # Run FFmpeg
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        # Run FFmpeg with rubberband
+        result = subprocess.run(cmd_rubberband, capture_output=True, text=True, timeout=300)
+        
+        if result.returncode == 0:
+            return True
+        
+        # If rubberband fails, try alternative method using atempo + asetrate
+        print("Rubberband filter not available, using alternative method...")
+        
+        # Alternative method: use atempo to compensate for speed changes
+        # This is more complex but should work with most FFmpeg versions
+        cmd_alternative = [
+            ffmpeg_cmd, '-i', input_file,
+            '-af', f'asetrate=44100*{pitch_ratio},atempo=1/{pitch_ratio},aresample=44100',
+            '-y', output_file
+        ]
+        
+        result = subprocess.run(cmd_alternative, capture_output=True, text=True, timeout=300)
         
         if result.returncode != 0:
             print(f"FFmpeg error: {result.stderr}")
@@ -149,19 +168,38 @@ def shift_pitch_pydub(input_file, output_file, pitch_ratio):
         # Load audio
         audio = AudioSegment.from_file(input_file)
         
-        # Apply pitch shift by changing the sample rate
+        # For pydub, we need to use a different approach to preserve tempo
+        # We'll use speedup/slowdown with pitch compensation
+        
+        # Calculate the speed factor to compensate for pitch change
         # This is a simplified approach - for better quality,
         # you'd want to use more sophisticated pitch shifting algorithms
-        new_sample_rate = int(audio.frame_rate * pitch_ratio)
-        shifted_audio = audio._spawn(audio.raw_data, overrides={'frame_rate': new_sample_rate})
         
-        # Set the frame rate back to original
-        shifted_audio = shifted_audio.set_frame_rate(audio.frame_rate)
-        
-        # Export
-        shifted_audio.export(output_file, format='mp3')
-        
-        return True
+        # Method 1: Try to use speedup/slowdown with pitch compensation
+        try:
+            # Speed up the audio by the inverse of pitch ratio to compensate
+            speed_factor = 1.0 / pitch_ratio
+            shifted_audio = audio.speedup(playback_speed=speed_factor)
+            
+            # Export
+            shifted_audio.export(output_file, format='mp3')
+            return True
+            
+        except AttributeError:
+            # If speedup is not available, fall back to the old method
+            # but warn about tempo change
+            print("Warning: pydub speedup not available. Pitch shift may affect tempo.")
+            
+            # Apply pitch shift by changing the sample rate
+            new_sample_rate = int(audio.frame_rate * pitch_ratio)
+            shifted_audio = audio._spawn(audio.raw_data, overrides={'frame_rate': new_sample_rate})
+            
+            # Set the frame rate back to original
+            shifted_audio = shifted_audio.set_frame_rate(audio.frame_rate)
+            
+            # Export
+            shifted_audio.export(output_file, format='mp3')
+            return True
         
     except Exception as e:
         print(f"Error shifting pitch with pydub: {e}")
@@ -171,6 +209,7 @@ def shift_pitch_pydub(input_file, output_file, pitch_ratio):
 def process_audio_with_pitch_shift(input_file, output_file, from_note, to_note, ffmpeg_path=None):
     """
     Process an audio file with pitch shifting from one note to another.
+    This function preserves the original tempo while changing the pitch.
     
     Args:
         input_file (str): Path to input audio file

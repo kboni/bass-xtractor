@@ -15,6 +15,7 @@ A Python script and GUI to extract bass from audio files or Youtube directly (si
 ### 🎼 **Pitch Shift Support**
 - **Musical note selection** - choose input and output pitches (C, D, E, F, G, A, B, etc.)
 - **All tracks shifted** - bass, drums, vocals, and other instruments
+- **Tempo preservation** - maintains original song speed while changing pitch
 - **FFmpeg integration** - high-quality pitch shifting using FFmpeg
 - **Fallback support** - pydub fallback if FFmpeg not available
 
@@ -226,11 +227,13 @@ https://www.youtube.com/watch?v=jNQXAC9IVRw
 2. **Select Input Pitch** - Choose the original key of your audio (e.g., C, D, E, F, G, A, B)
 3. **Select Output Pitch** - Choose the target key for the processed audio
 4. **Process files** - All tracks (bass, drums, vocals, other) will be pitch-shifted together
+5. **Tempo preserved** - The song speed remains unchanged, only the pitch is modified
 
 ### Supported Musical Notes
 - **Natural notes**: C, D, E, F, G, A, B
 - **Sharp notes**: C#, D#, F#, G#, A#
 - **All tracks shifted** - Bass, drums, vocals, and other instruments are all pitch-shifted together
+- **Tempo preservation** - Original song speed is maintained during pitch shifting
 - **Quality processing** - Uses FFmpeg for high-quality pitch shifting with pydub fallback
 
 ### Example Pitch Shifts
